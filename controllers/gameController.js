@@ -2,20 +2,80 @@ const pool = require("../DB/index.js").pool;
 const {v4: uuidv4} = require('uuid');
 
 exports.createGame = async (req, res) => {
-    const {start_time, paragraph, name} = req.body;
+    const {start_time, paragraph, name, organizer} = req.body;
     const id = uuidv4();
 
-    if (!start_time || !paragraph || !name) {
+    if (!start_time || !paragraph || !name || !organizer) {
         return res.status(400).json({
-            message: "Please send start time and paragraph"
+            message: "Please send start time,game name,organizer and paragraph"
         })
     }
     try {
-        const result = await pool.query("INSERT INTO GAME(id,start_time,paragraph,name) VALUES($1,$2,$3,$4) RETURNING *", [id, start_time, paragraph, name]);
+        const result = await pool.query("INSERT INTO GAME(id,start_time,paragraph,name,organizer) VALUES($1,$2,$3,$4,$5) RETURNING *", [id, start_time, paragraph, name, organizer]);
         return res.status(201).json(result.rows[0])
 
     } catch (e) {
         console.log(e);
+        return res.status(400).json({
+            message: "something went wrong"
+        })
+    }
+}
+
+exports.updateGame = async (req, res) => {
+    const {start_time, organizer, paragraph, name, id} = req.body;
+
+    if (!start_time || !paragraph || !organizer || !name || !id) {
+        return res.status(400).json({
+            message: "Please send id, start time, game name,organizer and paragraph"
+        })
+    }
+
+    try {
+        const result = await pool.query(
+            "UPDATE GAME SET NAME=$1,START_TIME=$2, PARAGRAPH=$3, ORGANIZER=$4 WHERE ID=$5 RETURNING *",
+            [name, start_time, paragraph, organizer, id]
+        );
+        return res.status(201).json(result.rows[0])
+
+    } catch (e) {
+        console.log(e);
+        return res.status(400).json({
+            message: "something went wrong"
+        })
+    }
+}
+exports.deleteGame = async (req, res) => {
+    const {id} = req.body;
+
+    if (!id) {
+        return res.status(400).json({
+            message: "Please send id"
+        })
+    }
+
+    try {
+        const result = await pool.query(
+            "DELETE FROM GAME WHERE ID=$1  RETURNING *", [id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(400).json({
+                message: "game not found with this id"
+            })
+        }
+        return res.status(200).json({
+            message: "deleted",
+            deleted_id: result.rows[0].id
+        })
+
+    } catch (e) {
+        console.log(e);
+        if (e.code === '22P02') {
+            return res.status(400).json({
+                message: "Invalid ID"
+            })
+
+        }
         return res.status(400).json({
             message: "something went wrong"
         })

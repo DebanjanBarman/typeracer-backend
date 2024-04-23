@@ -94,12 +94,12 @@ exports.protect = async (req, res, next) => {
 
         const freshUser = await pool.query("SELECT * FROM USER_DETAILS WHERE ID=$1", [decoded.id]);
 
-        if (!freshUser) {
+        if (!freshUser || freshUser.rows.length === 0) {
             return res.status(401).json({
                 message: "You're not logged in"
             });
         }
-        req.user = freshUser;
+        req.user = freshUser.rows[0];
         next();
 
     } catch (e) {
@@ -113,3 +113,14 @@ exports.protect = async (req, res, next) => {
 
     //Grant access to protected route
 };
+
+exports.authorizeAdmin = async (req, res, next) => {
+    // console.log(req.user)
+    if (req.user.role.toLowerCase() === 'admin') {
+        next();
+    } else {
+        return res.status(401).json({
+            message: "You're not authorized to perform this action"
+        });
+    }
+}
