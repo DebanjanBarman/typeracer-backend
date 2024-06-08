@@ -36,7 +36,7 @@ exports.updateGame = async (req, res) => {
             "UPDATE GAME SET NAME=$1,START_TIME=$2, PARAGRAPH=$3, ORGANIZER=$4 WHERE ID=$5 RETURNING *",
             [name, start_time, paragraph, organizer, id]
         );
-        return res.status(201).json(result.rows[0])
+        return res.status(200).json(result.rows[0])
 
     } catch (e) {
         console.log(e);
