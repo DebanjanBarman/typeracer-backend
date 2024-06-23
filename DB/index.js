@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 dotenv.config({path: "./config.env"});
 
 // Hosted DB
-let connectionString = "postgres://postgres.fjghcpzuknouvfnkkgiy:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres";
+let connectionString = process.env.DATABASE_URL;
 connectionString = connectionString.replace("[YOUR-PASSWORD]", process.env.DATABASE_PASSWORD);
 // Local DB
 // exports.pool = new Pool({
