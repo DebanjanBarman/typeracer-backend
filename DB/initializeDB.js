@@ -44,5 +44,30 @@ exports.initializeDB = async () => {
     } else {
         throw new Error("Creation of Tables Failed");
     }
+
+    const EVENT = await pool.query(`
+        CREATE TABLE IF NOT EXISTS EVENT_DETAILS
+        (
+            ID          UUID PRIMARY KEY,
+            NAME        VARCHAR(50),
+            DESCRIPTION VARCHAR(100),
+            DATE_FROM   DATE,
+            DATE_TO     DATE,
+            LOCATION    VARCHAR(100),
+            CATEGORY    VARCHAR(20),
+            STATUS      VARCHAR(50)
+        )`);
+
+    const addEvent = await pool.query(`
+        ALTER TABLE USER_DETAILS
+            ADD COLUMN EVENT UUID REFERENCES EVENT_DETAILS DEFAULT NULL;
+    `);
+
+    if (EVENT && addEvent) {
+        console.log("EVENT TABLE CREATED/NOT TOUCHED");
+    } else {
+        throw new Error("Creation of Tables Failed");
+    }
+
     return true;
 }
