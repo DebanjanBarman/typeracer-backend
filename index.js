@@ -6,13 +6,14 @@ const gameRouter = require("./routes/gameRoutes");
 const performanceRouter = require("./routes/performanceRoutes");
 const eventRouter = require("./routes/eventRoutes");
 const adminRouter = require("./routes/adminRoutes");
+const initDB = require("./DB/initializeDB");
 
 const app = express();
 const PORT = 3000;
-dotenv.config({ path: "./config.env" });
+dotenv.config({path: "./config.env"});
 
-app.use(express.json({ limit: "100kb" }));
-app.use(cors({ origin: "*", exposedHeaders: "Content-Range" }));
+app.use(express.json({limit: "100kb"}));
+app.use(cors({origin: "*", exposedHeaders: "Content-Range"}));
 
 app.options("/", cors());
 
@@ -23,9 +24,19 @@ app.use("/api/event", eventRouter);
 app.use("/api/admin", adminRouter);
 
 app.get("/", (req, res) => {
-  res.send("working");
+    res.send("working");
 });
 
+(async () => {
+    const db = await initDB.initializeDB();
+    if (db) {
+        console.log("DB connected successfully");
+    } else {
+        console.log(db);
+    }
+})();
+
+
 app.listen(PORT, () => {
-  console.log(`App running on port ${PORT}`);
+    console.log(`App running on port ${PORT}`);
 });
