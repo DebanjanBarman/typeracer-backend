@@ -115,19 +115,3 @@ exports.getEvents = async (req, res) => {
     res.status(400).json();
   }
 };
-
-exports.checkParticipation = async (req, res) => {
-  const { game, user } = req.query;
-
-  try {
-    const result = await pool.query(
-      "SELECT * FROM PERFORMANCE WHERE GAME_ID=$1 and USER_ID=$2",
-      [game, user]
-    );
-
-    res.status(200).json(result.rows.length);
-  } catch (e) {
-    console.log(e);
-    res.status(400).json();
-  }
-};
