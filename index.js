@@ -5,7 +5,6 @@ const userRouter = require("./routes/userRoutes");
 const gameRouter = require("./routes/gameRoutes");
 const performanceRouter = require("./routes/performanceRoutes");
 const eventRouter = require("./routes/eventRoutes");
-const adminRouter = require("./routes/adminRoutes");
 
 const app = express();
 const PORT = 3000;
@@ -20,11 +19,6 @@ app.use("/api/users", userRouter);
 app.use("/api/games", gameRouter);
 app.use("/api/performance", performanceRouter);
 app.use("/api/event", eventRouter);
-app.use("/api/admin", adminRouter);
-
-app.get("/", (req, res) => {
-  res.send("working");
-});
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}`);

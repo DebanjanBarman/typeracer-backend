@@ -2,19 +2,30 @@ const pool = require("../DB/index.js").pool;
 const { v4: uuidv4 } = require("uuid");
 
 exports.createEvent = async (req, res) => {
-  const { name, desc, dateFrom, dateTo, location, category, status } = req.body;
+  const { name, description, dateFrom, dateTo, location, category, status } =
+    req.body;
   const id = uuidv4();
 
-  if (!(name && desc && dateFrom && dateTo && location && category && status)) {
+  if (
+    !(
+      name &&
+      description &&
+      dateFrom &&
+      dateTo &&
+      location &&
+      category &&
+      status
+    )
+  ) {
     return res.status(400).json({
       message:
-        "Please send the details: {name, desc, dateFrom, dateTo, location, category, status} ",
+        "Please send the details: {name, description, dateFrom, dateTo, location, category, status} ",
     });
   }
   try {
     const result = await pool.query(
-      "INSERT INTO EVENT_DETAILS(id,name,description,date_from,date_to, location, category, status) VALUES($1,$2,$3,$4,$5) RETURNING *",
-      [id, name, desc, dateFrom, dateTo, location, category, status]
+      "INSERT INTO EVENT_DETAILS(id,name,description,date_from,date_to, location, category, status) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *",
+      [id, name, description, dateFrom, dateTo, location, category, status]
     );
     return res.status(201).json(result.rows[0]);
   } catch (e) {
@@ -26,20 +37,39 @@ exports.createEvent = async (req, res) => {
 };
 
 exports.updateEvent = async (req, res) => {
-  const { name, desc, dateFrom, dateTo, location, category, status, id } =
-    req.body;
+  const {
+    name,
+    description,
+    dateFrom,
+    dateTo,
+    location,
+    category,
+    status,
+    id,
+  } = req.body;
 
-  if (!(name && desc && dateFrom && dateTo && location && category && status)) {
+  if (
+    !(
+      id &&
+      name &&
+      description &&
+      dateFrom &&
+      dateTo &&
+      location &&
+      category &&
+      status
+    )
+  ) {
     return res.status(400).json({
       message:
-        "Please send the details: {name, desc, dateFrom, dateTo, location, category, status, id} ",
+        "Please send the details: {name, description, dateFrom, dateTo, location, category, status, id} ",
     });
   }
 
   try {
     const result = await pool.query(
       "UPDATE EVENT_DETAILS SET NAME=$1, DESCRIPTION=$2, DATE_FROM=$3, DATE_TO=$4, LOCATION=$5, CATEGORY=$6, STATUS=$7 WHERE ID=$8 RETURNING *",
-      [name, desc, dateFrom, dateTo, location, category, status, id]
+      [name, description, dateFrom, dateTo, location, category, status, id]
     );
     return res.status(200).json(result.rows[0]);
   } catch (e) {
@@ -50,7 +80,7 @@ exports.updateEvent = async (req, res) => {
   }
 };
 exports.deleteEvent = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
 
   if (!id) {
     return res.status(400).json({
@@ -129,5 +159,38 @@ exports.checkParticipation = async (req, res) => {
   } catch (e) {
     console.log(e);
     res.status(400).json();
+  }
+};
+
+exports.registerEvent = async (req, res) => {
+  const { user_id, event_id, team_name, status } = req.body;
+  const id = uuidv4();
+
+  if (!(id && user_id && event_id && team_name && status)) {
+    return res.status(400).json({
+      message:
+        "Please send the details: {user_id, event_id, team_name, status}",
+    });
+  }
+  try {
+    const eventRegistrationsRow = await pool.query(
+      "SELECT ID FROM EVENT_REGISTRATIONS WHERE USER_ID=$1 AND EVENT_ID=$2",
+      [user_id, event_id]
+    );
+    if (eventRegistrationsRow.rows.length > 0) {
+      return res
+        .status(401)
+        .json({ message: "You have registered already for this event." });
+    }
+    const newEventRegistration = await pool.query(
+      "INSERT INTO EVENT_REGISTRATIONS(id,user_id,event_id,team_name,status) VALUES($1,$2,$3,$4,$5) RETURNING *",
+      [id, user_id, event_id, team_name, status]
+    );
+    return res.status(201).json(newEventRegistration.rows[0]);
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({
+      message: "something went wrong",
+    });
   }
 };
