@@ -58,16 +58,27 @@ exports.initializeDB = async () => {
             STATUS      VARCHAR(50)
         )`);
 
-    const addEvent = await pool.query(`
-        ALTER TABLE USER_DETAILS
-            ADD COLUMN EVENT UUID REFERENCES EVENT_DETAILS DEFAULT NULL;
-    `);
 
-    if (EVENT && addEvent) {
+    if (EVENT) {
         console.log("EVENT TABLE CREATED/NOT TOUCHED");
     } else {
         throw new Error("Creation of Tables Failed");
     }
 
+    const EVENT_REGISTER = await pool.query(`
+        CREATE TABLE IF NOT EXISTS EVENT_REGISTRATIONS
+        (
+            ID        UUID PRIMARY KEY,
+            user_id   uuid REFERENCES USER_DETAILS (ID),
+            event_id  uuid REFERENCES EVENT_DETAILS (ID),
+            team_name character varying(100),
+            status    character varying(50)
+        )`);
+
+    if (EVENT_REGISTER) {
+        console.log("EVENT_REGISTER TABLE CREATED/NOT TOUCHED");
+    } else {
+        throw new Error("Creation of Tables Failed");
+    }
     return true;
 }

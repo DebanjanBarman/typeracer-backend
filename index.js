@@ -27,14 +27,14 @@ app.get("/", (req, res) => {
     res.send("working");
 });
 
-// (async () => {
-//     const db = await initDB.initializeDB();
-//     if (db) {
-//         console.log("DB connected successfully");
-//     } else {
-//         console.log(db);
-//     }
-// })();
+(async () => {
+    const db = await initDB.initializeDB();
+    if (db) {
+        console.log("DB connected successfully");
+    } else {
+        console.log(db);
+    }
+})();
 
 
 app.listen(PORT, () => {
