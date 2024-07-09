@@ -9,8 +9,8 @@ const adminRouter = require("./routes/adminRoutes");
 const initDB = require("./DB/initializeDB");
 
 const app = express();
-const PORT = 3000;
 dotenv.config({path: "./config.env"});
+const PORT = process.env.PORT;
 
 app.use(express.json({limit: "100kb"}));
 app.use(cors({origin: "*", exposedHeaders: "Content-Range"}));
