@@ -19,6 +19,7 @@ app.use("/api/users", userRouter);
 app.use("/api/games", gameRouter);
 app.use("/api/performance", performanceRouter);
 app.use("/api/event", eventRouter);
+app.use(express.static("public"));
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}`);

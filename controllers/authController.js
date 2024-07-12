@@ -2,6 +2,8 @@ const pool = require("../DB/index.js").pool;
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
+const path = require("path");
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -38,6 +40,87 @@ exports.signup = async (req, res) => {
         message: "bad request",
       });
     }
+  }
+};
+
+exports.uploadProfilePicture = async (req, res) => {
+  const { id } = req.params;
+  const file = req.file;
+
+  try {
+    let user = await pool.query(
+      "SELECT IMG_URL FROM USER_DETAILS WHERE ID=$1",
+      [id]
+    );
+    if (user.rows.length === 0)
+      return res.status(400).json({ message: "User with ID do not exist." });
+    const oldImgName = user.rows[0].img_url;
+    if (oldImgName !== "default.jpg") {
+      const filePath = path.join(__dirname, `../public/imgs/${oldImgName}`);
+      fs.unlink(filePath, function (err) {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log("File removed:", filePath);
+        }
+      });
+    }
+    user = await pool.query(
+      "UPDATE USER_DETAILS SET IMG_URL=$2 WHERE ID=$1 RETURNING *",
+      [id, file.filename]
+    );
+    if (user.rows.length === 0)
+      return res.status(400).json({ message: "Something went wrong" });
+    return res.status(200).json({ message: "success", data: user.rows[0] });
+  } catch (e) {
+    console.log(e);
+    return res
+      .status(400)
+      .json({ message: "Something went wrong", error: JSON.stringify(e) });
+  }
+};
+
+exports.profileUpdate = async (req, res) => {
+  const { username, email, gender, dob } = req.body;
+  const { id } = req.params;
+  if (!email || !username || email === "" || username === "") {
+    return res.status(400).json({
+      message: "please provide email and username",
+    });
+  }
+  try {
+    let user = await pool.query(
+      "SELECT * FROM USER_DETAILS WHERE (EMAIL=$2 OR NAME=$3) AND ID<>$1",
+      [id, email, username]
+    );
+
+    if (user.rows.length > 0) {
+      return res.status(400).json({
+        message: "email and/or username already taken.",
+      });
+    }
+
+    user = await pool.query(
+      "UPDATE USER_DETAILS SET NAME=$2, EMAIL=$3, GENDER=$4, DOB=$5 WHERE ID=$1 RETURNING *",
+      [id, username, email, gender, dob]
+    );
+
+    if (user.rows.length === 1) {
+      user.rows[0].password = undefined;
+      res.status(200).json({
+        message: "success",
+        data: user.rows[0],
+      });
+    } else {
+      res.status(400).json({
+        message: "Unable to update the profile.",
+      });
+    }
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({
+      message: "Unable update the profile.",
+    });
   }
 };
 
