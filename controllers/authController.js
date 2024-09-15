@@ -115,7 +115,7 @@ exports.protect = async (req, res, next) => {
     req.user = freshUser.rows[0];
     next();
   } catch (e) {
-    return res.status(400).json({
+    return res.status(401).json({
       message: "You're not logged in",
     });
   }
