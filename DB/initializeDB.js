@@ -27,7 +27,8 @@ exports.initializeDB = async () => {
             PARAGRAPH  VARCHAR(2000),
             VISIBLE    BOOLEAN DEFAULT false,
             NAME       VARCHAR(100),
-            ORGANIZER  VARCHAR(100)
+            ORGANIZER  VARCHAR(100),
+            CREATED_BY UUID REFERENCES USER_DETAILS (ID)
         )`);
     if (GAME) {
         console.log("GAME TABLE CREATED/NOT TOUCHED");

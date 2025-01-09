@@ -3,6 +3,7 @@ const {v4: uuidv4} = require('uuid');
 
 exports.createGame = async (req, res) => {
     const {start_time, paragraph, name, organizer} = req.body;
+    const user_id = req.user.id;
     const id = uuidv4();
 
     if (!start_time || !paragraph || !name || !organizer) {
@@ -11,7 +12,7 @@ exports.createGame = async (req, res) => {
         })
     }
     try {
-        const result = await pool.query("INSERT INTO GAME(id,start_time,paragraph,name,organizer) VALUES($1,$2,$3,$4,$5) RETURNING *", [id, start_time, paragraph, name, organizer]);
+        const result = await pool.query("INSERT INTO GAME(id,start_time,paragraph,name,organizer,created_by) VALUES($1,$2,$3,$4,$5,$6) RETURNING *", [id, start_time, paragraph, name, organizer, user_id]);
         return res.status(201).json(result.rows[0])
 
     } catch (e) {
@@ -24,10 +25,9 @@ exports.createGame = async (req, res) => {
 
 exports.updateGame = async (req, res) => {
     const {start_time, organizer, paragraph, name, id, visible} = req.body;
-
-    if (!start_time || !paragraph || !organizer || !name || !id || !visible) {
+    if (!start_time || !paragraph || !organizer || !name || !id) {
         return res.status(400).json({
-            message: "Please send id, start time, game name,organizer,visible and paragraph"
+            message: "Please send id, start time, game name,organizer and paragraph"
         })
     }
 
@@ -86,8 +86,7 @@ exports.getGame = async (req, res) => {
     }
 
     try {
-        const result = await pool.query("SELECT * FROM GAME WHERE ID=$1", [gameID]);
-
+        const result = await pool.query("SELECT * FROM GAME WHERE ID=$1 AND VISIBLE=true", [gameID]);
         return res.status(200).json(result.rows[0]);
     } catch (e) {
         console.log(e);
@@ -96,14 +95,39 @@ exports.getGame = async (req, res) => {
 }
 exports.getGames = async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM GAME ORDER BY START_TIME AND VISIBLE=true");
+        const result = await pool.query("SELECT * FROM GAME  WHERE VISIBLE=true ORDER BY START_TIME");
         res.status(200).json(result.rows)
     } catch (e) {
         console.log(e);
         res.status(400).json()
     }
 }
+exports.getMyGames = async (req, res) => {
+    let user_id = req.user.id;
+    console.log(user_id)
+    try {
+        const result = await pool.query("SELECT * FROM GAME WHERE created_by=$1", [user_id]);
+        console.log(result.rows);
+        res.status(200).json(result.rows)
+    } catch (e) {
+        console.log(e);
+        res.status(400).json()
+    }
+}
+exports.getMyGame = async (req, res) => {
+    const gameID = req.params.id;
 
+    let user_id = req.user.id;
+    console.log(user_id)
+    try {
+        const result = await pool.query("SELECT * FROM GAME WHERE created_by=$1 AND id=$2", [user_id, gameID]);
+        console.log(result.rows);
+        res.status(200).json(result.rows[0])
+    } catch (e) {
+        console.log(e);
+        res.status(400).json()
+    }
+}
 exports.checkParticipation = async (req, res) => {
     const {game, user} = req.query;
 

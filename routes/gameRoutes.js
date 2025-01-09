@@ -24,6 +24,8 @@ router.get("/participation",
     gameController.checkParticipation
 );
 router.get("/", gameController.getGames);
+router.get("/my-games", authController.protect, gameController.getMyGames);
+router.get("/my-games/:id", authController.protect, gameController.getMyGame);
 router.get("/:id", authController.protect, gameController.getGame);
 
 module.exports = router;
