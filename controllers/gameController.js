@@ -86,7 +86,7 @@ exports.getGame = async (req, res) => {
     }
 
     try {
-        const result = await pool.query("SELECT * FROM GAME WHERE ID=$1 AND VISIBLE=true", [gameID]);
+        const result = await pool.query("SELECT * FROM GAME WHERE ID=$1", [gameID]);
 
         return res.status(200).json(result.rows[0]);
     } catch (e) {
