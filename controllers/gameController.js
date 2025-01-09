@@ -96,7 +96,7 @@ exports.getGame = async (req, res) => {
 }
 exports.getGames = async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM GAME ORDER BY START_TIME");
+        const result = await pool.query("SELECT * FROM GAME ORDER BY START_TIME AND VISIBLE=true");
         res.status(200).json(result.rows)
     } catch (e) {
         console.log(e);
