@@ -8,7 +8,10 @@ exports.initializeDB = async () => {
             ID       UUID PRIMARY KEY,
             EMAIL    VARCHAR(100) UNIQUE,
             PASSWORD VARCHAR(200),
-            ROLE     VARCHAR(5) DEFAULT 'user'
+            ROLE     VARCHAR(5)   DEFAULT 'user',
+            DOB      DATE         DEFAULT '2000-01-01',
+            GENDER   VARCHAR(20)  DEFAULT 'GENDER',
+            IMG_URL  VARCHAR(250) DEFAULT 'default.jpg'
         )`);
 
     if (USER) {
@@ -22,6 +25,7 @@ exports.initializeDB = async () => {
             ID         UUID PRIMARY KEY,
             START_TIME timestamp,
             PARAGRAPH  VARCHAR(2000),
+            VISIBLE    BOOLEAN DEFAULT false,
             NAME       VARCHAR(100),
             ORGANIZER  VARCHAR(100)
         )`);
