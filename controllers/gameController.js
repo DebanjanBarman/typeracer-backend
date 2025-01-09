@@ -23,19 +23,16 @@ exports.createGame = async (req, res) => {
 }
 
 exports.updateGame = async (req, res) => {
-    const {start_time, organizer, paragraph, name, id} = req.body;
+    const {start_time, organizer, paragraph, name, id, visible} = req.body;
 
-    if (!start_time || !paragraph || !organizer || !name || !id) {
+    if (!start_time || !paragraph || !organizer || !name || !id || !visible) {
         return res.status(400).json({
-            message: "Please send id, start time, game name,organizer and paragraph"
+            message: "Please send id, start time, game name,organizer,visible and paragraph"
         })
     }
 
     try {
-        const result = await pool.query(
-            "UPDATE GAME SET NAME=$1,START_TIME=$2, PARAGRAPH=$3, ORGANIZER=$4 WHERE ID=$5 RETURNING *",
-            [name, start_time, paragraph, organizer, id]
-        );
+        const result = await pool.query("UPDATE GAME SET NAME=$1,START_TIME=$2, PARAGRAPH=$3, ORGANIZER=$4,VISIBLE=$5 WHERE ID=$6 RETURNING *", [name, start_time, paragraph, organizer, visible, id]);
         return res.status(200).json(result.rows[0])
 
     } catch (e) {
@@ -45,6 +42,7 @@ exports.updateGame = async (req, res) => {
         })
     }
 }
+
 exports.deleteGame = async (req, res) => {
     const {id} = req.body;
 
@@ -55,17 +53,14 @@ exports.deleteGame = async (req, res) => {
     }
 
     try {
-        const result = await pool.query(
-            "DELETE FROM GAME WHERE ID=$1  RETURNING *", [id]
-        );
+        const result = await pool.query("DELETE FROM GAME WHERE ID=$1  RETURNING *", [id]);
         if (result.rows.length === 0) {
             return res.status(400).json({
                 message: "game not found with this id"
             })
         }
         return res.status(200).json({
-            message: "deleted",
-            deleted_id: result.rows[0].id
+            message: "deleted", deleted_id: result.rows[0].id
         })
 
     } catch (e) {
@@ -91,7 +86,7 @@ exports.getGame = async (req, res) => {
     }
 
     try {
-        const result = await pool.query("SELECT * FROM GAME WHERE ID=$1", [gameID]);
+        const result = await pool.query("SELECT * FROM GAME WHERE ID=$1 AND VISIBLE=true", [gameID]);
 
         return res.status(200).json(result.rows[0]);
     } catch (e) {
