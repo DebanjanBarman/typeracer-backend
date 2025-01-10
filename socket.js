@@ -4,12 +4,7 @@ const socketIo = require('socket.io');
 let io;
 
 function initSocket(server) {
-    io = socketIo(server, {
-        cors: {
-            origin: "*",
-            methods: ["GET", "POST"]
-        }
-    });
+    io = socketIo(server);
     return io;
 }
 

@@ -20,7 +20,7 @@ app.use(express.json());
 dotenv.config({path: "./config.env"});
 const PORT = process.env.PORT;
 
-app.use(cors({origin: "*", exposedHeaders: "Content-Range"}));
+app.use(cors({origin: "*", exposedHeaders: "Content-Range", allowedHeaders: "Access-Control-Allow-Origin"}));
 
 app.options("/", cors());
 
