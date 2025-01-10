@@ -1,5 +1,6 @@
 const pool = require("../DB/index.js").pool;
 const {v4: uuidv4} = require('uuid');
+const {broadcastMessage} = require('../socket');
 
 exports.createPerformance = async (req, res) => {
     const {user_id, game_id, time_taken} = req.body;
@@ -11,6 +12,7 @@ exports.createPerformance = async (req, res) => {
     }
     try {
         let result = await pool.query("INSERT INTO PERFORMANCE(ID,GAME_ID,USER_ID,TIME_TAKEN) VALUES($1,$2,$3,$4) RETURNING *", [id, game_id, user_id, time_taken]);
+        await broadcastMessage("updated")
         return res.status(201).json(result.rows[0]);
     } catch (e) {
         console.log(e);

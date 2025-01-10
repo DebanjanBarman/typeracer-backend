@@ -1,6 +1,6 @@
 const pool = require("../DB/index.js").pool;
 const {v4: uuidv4} = require('uuid');
-const {getIo} = require('../socket');
+const {broadcastMessage} = require('../socket');
 
 
 exports.createGame = async (req, res) => {
@@ -15,6 +15,8 @@ exports.createGame = async (req, res) => {
     }
     try {
         const result = await pool.query("INSERT INTO GAME(id,start_time,paragraph,name,organizer,created_by) VALUES($1,$2,$3,$4,$5,$6) RETURNING *", [id, start_time, paragraph, name, organizer, user_id]);
+
+        await broadcastMessage("updated")
         return res.status(201).json(result.rows[0])
 
     } catch (e) {
@@ -35,6 +37,8 @@ exports.updateGame = async (req, res) => {
 
     try {
         const result = await pool.query("UPDATE GAME SET NAME=$1,START_TIME=$2, PARAGRAPH=$3, ORGANIZER=$4,VISIBLE=$5 WHERE ID=$6 RETURNING *", [name, start_time, paragraph, organizer, visible, id]);
+        await broadcastMessage("updated")
+
         return res.status(200).json(result.rows[0])
 
     } catch (e) {
@@ -56,8 +60,7 @@ exports.deleteGame = async (req, res) => {
 
     try {
         const result = await pool.query("DELETE FROM GAME WHERE ID=$1  RETURNING *", [id]);
-        const io = getIo();
-        io.emit("game_updated");
+        await broadcastMessage("updated")
 
         if (result.rows.length === 0) {
             return res.status(400).json({
@@ -112,7 +115,7 @@ exports.getMyGames = async (req, res) => {
     console.log(user_id)
     try {
         const result = await pool.query("SELECT * FROM GAME WHERE created_by=$1", [user_id]);
-        console.log(result.rows);
+        // console.log(result.rows);
         res.status(200).json(result.rows)
     } catch (e) {
         console.log(e);
@@ -126,7 +129,7 @@ exports.getMyGame = async (req, res) => {
     console.log(user_id)
     try {
         const result = await pool.query("SELECT * FROM GAME WHERE created_by=$1 AND id=$2", [user_id, gameID]);
-        console.log(result.rows);
+        // console.log(result.rows);
         res.status(200).json(result.rows[0])
     } catch (e) {
         console.log(e);

@@ -1,27 +1,28 @@
+const socketIo = require('socket.io');
+
+// This function will accept the HTTP server and initialize Socket.IO
 let io;
 
-module.exports = {
-    init: (server) => {
-        const { Server } = require('socket.io');
-        io = new Server(server, {
-            cors: {
-                origin: "*",
-            },
-        });
-
-        // Setup Socket.IO events here if needed
-        io.on('connection', (socket) => {
-            console.log('A client connected', socket.id);
-            // Any event logic can be added here
-        });
-
-        return io;
-    },
-
-    getIo: () => {
-        if (!io) {
-            throw new Error('Socket.io is not initialized!');
+function initSocket(server) {
+    io = socketIo(server, {
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"]
         }
-        return io;
+    });
+    return io;
+}
+
+// Function to broadcast a message to all connected clients
+async function broadcastMessage(message) {
+    if (io) {
+        io.emit('updated', message); // Emit to all clients
+    } else {
+        console.log("Socket.IO is not initialized");
     }
+}
+
+module.exports = {
+    initSocket,
+    broadcastMessage
 };
