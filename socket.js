@@ -4,7 +4,11 @@ const socketIo = require('socket.io');
 let io;
 
 function initSocket(server) {
-    io = socketIo(server);
+    io = socketIo(server, {
+        cors: {
+            origin: '*',
+        }
+    });
     return io;
 }
 
@@ -18,6 +22,5 @@ async function broadcastMessage(message) {
 }
 
 module.exports = {
-    initSocket,
-    broadcastMessage
+    initSocket, broadcastMessage
 };
