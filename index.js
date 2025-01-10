@@ -12,7 +12,7 @@ const express = require('express');
 const http = require('http');
 const {initSocket} = require('./socket'); // Import the socket module
 const app = express();
-const server = http.createServer(app);
+const server = http.createServer(app, cors({origin: "*", exposedHeaders: "Content-Range"}));
 
 initSocket(server);
 app.use(express.json());
@@ -20,7 +20,7 @@ app.use(express.json());
 dotenv.config({path: "./config.env"});
 const PORT = process.env.PORT;
 
-app.use(cors({origin: "*", exposedHeaders: "Content-Range", allowedHeaders: "Access-Control-Allow-Origin"}));
+app.use(cors({origin: "*", exposedHeaders: "Content-Range"}));
 
 app.options("/", cors());
 
