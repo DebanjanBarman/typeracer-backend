@@ -7,8 +7,14 @@ const performanceRouter = require("./routes/performanceRoutes");
 const eventRouter = require("./routes/eventRoutes");
 const adminRouter = require("./routes/adminRoutes");
 const initDB = require("./DB/initializeDB");
+const {Server} = require("socket.io");
+const {init} = require('./socket');
+const {createServer} = require('http');
 
 const app = express();
+const server = createServer(app);
+const io = init(server)
+
 dotenv.config({path: "./config.env"});
 const PORT = process.env.PORT;
 
@@ -25,6 +31,15 @@ app.use("/api/admin", adminRouter);
 
 app.get("/", (req, res) => {
     res.send("working");
+});
+
+io.on('connection', (socket) => {
+    console.log('a user connected', socket.id);
+    // socket.emit("quiz_updated", {data: "Fetch the quizzes data again"})
+    socket.broadcast.emit("game_updated", {data: "fetch the game_updated data again"})
+    socket.on("game_updated", (arg) => {
+        console.log(arg);
+    });
 });
 
 (async () => {

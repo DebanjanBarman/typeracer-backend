@@ -1,5 +1,7 @@
 const pool = require("../DB/index.js").pool;
 const {v4: uuidv4} = require('uuid');
+const {getIo} = require('../socket');
+
 
 exports.createGame = async (req, res) => {
     const {start_time, paragraph, name, organizer} = req.body;
@@ -54,6 +56,9 @@ exports.deleteGame = async (req, res) => {
 
     try {
         const result = await pool.query("DELETE FROM GAME WHERE ID=$1  RETURNING *", [id]);
+        const io = getIo();
+        io.emit("game_updated");
+
         if (result.rows.length === 0) {
             return res.status(400).json({
                 message: "game not found with this id"
@@ -95,7 +100,7 @@ exports.getGame = async (req, res) => {
 }
 exports.getGames = async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM GAME  WHERE VISIBLE=true ORDER BY START_TIME");
+        const result = await pool.query("SELECT * FROM GAME  WHERE VISIBLE=true");
         res.status(200).json(result.rows)
     } catch (e) {
         console.log(e);
